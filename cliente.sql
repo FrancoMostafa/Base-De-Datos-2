@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS producto (
     codigo VARCHAR(16),
     descripcion VARCHAR(256),
     id_precio INT,
-    PRIMARY KEY (id_producto)
+    PRIMARY KEY (id_producto, id_precio)
 );
 
 CREATE TABLE IF NOT EXISTS factura_producto (
@@ -40,10 +40,8 @@ CREATE TABLE IF NOT EXISTS precio (
 	id_precio INT,
     monto DECIMAL(8,2),
     fecha DATE,
-    id_producto INT,
-    PRIMARY KEY (id_precio),
-	FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
-);
+    id_producto INT NOT NULL,
+    PRIMARY KEY (id_precio));
 
 # Ejercicio 2
 
@@ -65,6 +63,15 @@ VALUES (3, 1, 20/20/22, 3);
 INSERT INTO factura (id_factura, id_cliente, fecha, numero)
 VALUES (2, 2, 20/20/20, 2);
 
+INSERT INTO precio (id_precio, monto, fecha, id_producto)
+VALUES (1,200.50,24/10/22, 1);
+
+INSERT INTO precio (id_precio, monto, fecha, id_producto)
+VALUES (2,150.50,24/10/21, 1);
+
+INSERT INTO precio (id_precio, monto, fecha, id_producto)
+VALUES (3,90.50,24/10/21, 2);
+
 INSERT INTO producto (id_producto, codigo, descripcion, id_precio)
 VALUES (1,"d34","una almohada", 1);
 
@@ -83,14 +90,8 @@ VALUES (2,1,40);
 INSERT INTO factura_producto (id_factura, id_producto, cantidad)
 VALUES (2,2,10);
 
-INSERT INTO precio (id_precio, monto, fecha, id_producto)
-VALUES (1,200.50,24/10/22, 1);
-
-INSERT INTO precio (id_precio, monto, fecha, id_producto)
-VALUES (2,150.50,24/10/21, 1);
-
-INSERT INTO precio (id_precio, monto, fecha, id_producto)
-VALUES (3,90.50,24/10/21, 2);
+ALTER TABLE producto 
+ADD CONSTRAINT FOREIGN KEY (id_precio) REFERENCES precio(id_precio);
 
 # Ejercicio 3
 SELECT codigo, apellido, nombre, numero
@@ -103,14 +104,14 @@ FROM producto INNER JOIN precio
 WHERE producto.id_producto = precio.id_producto;
 
 # Ejercicio 5
-SELECT codigo, SUM(cantidad) AS cantidad_de_ventas
+SELECT producto.id_producto, SUM(cantidad) AS cantidad_de_ventas
 FROM factura_producto INNER JOIN producto 
 WHERE factura_producto.id_producto = producto.id_producto
-GROUP BY producto.id_producto
+GROUP BY id_producto
 ORDER BY cantidad_de_ventas DESC;
 
 # Ejercicio 6
-SELECT codigo, SUM(monto) AS monto_total
+SELECT producto.id_producto, SUM(monto) AS monto_total
 FROM factura_producto INNER JOIN producto INNER JOIN precio
 WHERE factura_producto.id_producto = producto.id_producto
 GROUP BY producto.id_producto
